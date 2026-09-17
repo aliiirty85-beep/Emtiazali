@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>روند علی</title>
+<style>
+body{margin:0;min-height:100vh;font-family:Tahoma,sans-serif;color:#fff;background:linear-gradient(165deg,#3b0764,#9d174d 50%,#12081f);display:flex;align-items:center;justify-content:center;padding:22px;text-align:center}
+.box{width:min(440px,100%)}
+.xp{font-size:3.6rem;font-weight:900;color:#fde047}
+.bar{height:16px;background:#0005;border-radius:99px;overflow:hidden;margin:14px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#fde047,#67e8f9);width:0}
+.tag{display:inline-block;margin-top:8px;padding:8px 14px;border-radius:999px;font-weight:900}
+.behind{background:#fb7185} .ok{background:#34d399;color:#064e3b} .ahead{background:#fde047;color:#3b0764}
+p{font-weight:700;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="box">
+  <p>روند مطالعه علی</p>
+  <div class="xp" id="n">—</div>
+  <div class="bar"><i id="f"></i></div>
+  <div class="tag ok" id="tag">...</div>
+  <h2 id="h" style="margin-top:12px">در حال اتصال</h2>
+  <p id="s">مانده تا ۲۵۰ و جلو/عقب بودن اینجا می‌آید. امتیاز دست تو نیست.</p>
+</div>
+<script>
+const API="https://jsonblob.com/api/jsonBlob/";
+const id=new URLSearchParams(location.search).get("id");
+async function pull(){
+  if(!id){ document.getElementById("h").textContent="لینک ناقص است. علی باید دوباره «لینک مشاهده روند» را بزند."; return; }
+  try{
+    const st=await (await fetch(API+id,{cache:"no-store"})).json();
+    const sc=+st.score||0;
+    document.getElementById("n").textContent=sc;
+    document.getElementById("f").style.width=Math.min(100,100*sc/360)+"%";
+    const gap=+st.gap||0;
+    const tag=document.getElementById("tag");
+    tag.className="tag "+(gap>=10?"ahead":gap>=-8?"ok":"behind");
+    tag.textContent=gap>=10?"جلوی هدف":gap>=-8?"همراه هدف":"عقب از هدف";
+    document.getElementById("h").textContent=st.mood||"";
+    document.getElementById("s").textContent="مانده تا ۲۵۰: "+(st.left!=null?st.left:"—")+" امتیاز · زمان بلوک: "+(st.rm!=null?st.rm:"—")+" دقیقه";
+  }catch(e){
+    document.getElementById("h").textContent="وصل نشد. یک بار صفحه را رفرش کن.";
+  }
+}
+pull(); setInterval(pull, 3000);
+</script>
+</body>
+</html>
