@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ناظر</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Tahoma,sans-serif;color:#fff;min-height:100vh;background:linear-gradient(165deg,#2e1065,#9d174d 55%,#0c0614);padding:22px 16px}
+h1{font-size:1.2rem;margin-bottom:12px}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:#0005;border:2px solid #fff3;border-radius:22px;padding:18px;text-align:center}
+.k{font-weight:800;opacity:.85}
+.v{font-size:clamp(2.4rem,12vw,3.4rem);font-weight:900}
+.tag{display:inline-block;margin:14px 0;padding:8px 14px;border-radius:999px;font-weight:900}
+.behind{background:#fb7185}.ok{background:#34d399;color:#064e3b}.ahead{background:#fde047;color:#3b0764}
+p{font-weight:800;line-height:1.7;margin:8px 0}
+</style>
+</head>
+<body>
+<h1>ناظر · نبرد ۱۰ دقیقه</h1>
+<div class="board">
+  <div class="card"><div class="k">علی</div><div class="v" id="n" style="color:#67e8f9">—</div></div>
+  <div class="card"><div class="k">طاها</div><div class="v" id="t" style="color:#fb7185">—</div></div>
+</div>
+<div class="tag ok" id="tag">...</div>
+<p id="h">در حال اتصال…</p>
+<p id="s"></p>
+<p style="opacity:.8;font-size:.85rem">لینک ثابت. هر ده دقیقه از نو.</p>
+<script>
+const NTFY="https://ntfy.sh/emtiazali-hf-live";
+async function pull(){
+  try{
+    const txt=await (await fetch(NTFY+"/json?poll=1&since=24h",{cache:"no-store"})).text();
+    const lines=txt.trim().split("\n").filter(Boolean);
+    if(!lines.length){ document.getElementById("h").textContent="هنوز امتیازی نیامده."; return; }
+    const last=JSON.parse(lines[lines.length-1]);
+    const st=typeof last.message==="string"?JSON.parse(last.message):last.message;
+    const score=+st.score||0;
+    const tn=+st.aryaNow||0;
+    const goal=+st.goal||40;
+    document.getElementById("n").textContent=score;
+    document.getElementById("t").textContent=tn;
+    const vs=score-tn;
+    const tag=document.getElementById("tag");
+    tag.className="tag "+(vs>=3?"ahead":vs<=-3?"behind":"ok");
+    tag.textContent=vs>=3?"علی جلوست":vs<=-3?"طاها جلوست":"نزدیک";
+    document.getElementById("h").textContent=vs>=3?"علی از طاها جلوست.":vs<=-3?"طاها عدد بالاتری دارد.":"رقابت نزدیک است.";
+    document.getElementById("s").textContent="هدف این ده دقیقه "+goal;
+  }catch(e){ document.getElementById("h").textContent="وصل نشد…"; }
+}
+pull(); setInterval(pull,4000);
+</script>
+</body>
+</html>
